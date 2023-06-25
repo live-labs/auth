@@ -266,7 +266,7 @@ func TestAuthRequired_NoAuth(t *testing.T) {
 
 	httpHandlerFunc := authenticator.Wrap(func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusOK)
-	})
+	}, true)
 
 	httpHandlerFunc.ServeHTTP(rr, req)
 
@@ -305,7 +305,7 @@ func TestAuthRequired_AuthCorrect(t *testing.T) {
 
 	httpHandlerFunc := authenticator.Wrap(func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusOK)
-	})
+	}, true)
 
 	httpHandlerFunc.ServeHTTP(rr, req)
 

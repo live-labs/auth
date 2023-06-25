@@ -10,10 +10,10 @@ const (
 )
 
 type RoleSet interface {
-	// Has checks if the role is in the set.
-	Has(role string) bool
 	// HasAny checks if any of the roles is in the set.
-	HasAny(roles []string) bool
+	HasAny(roles ...string) bool
+	// HasAll checks if all of the roles are in the set.
+	HasAll(roles ...string) bool
 	// String returns a string representation of the set.
 	String() string
 	// List returns a list of roles in the set.
@@ -37,22 +37,28 @@ func NewRoleSet() RoleSet {
 	}
 }
 
-func (r *roleSet) Has(role string) bool {
-	r.m.RLock()
-	defer r.m.RUnlock()
-	_, ok := r.d[role]
-	return ok
-}
-
-func (r *roleSet) HasAny(roles []string) bool {
+func (r *roleSet) HasAny(roles ...string) bool {
 	r.m.RLock()
 	defer r.m.RUnlock()
 	for _, v := range roles {
-		if r.Has(v) {
+		_, ok := r.d[v]
+		if ok {
 			return true
 		}
 	}
 	return false
+}
+
+func (r *roleSet) HasAll(roles ...string) bool {
+	r.m.RLock()
+	defer r.m.RUnlock()
+	for _, v := range roles {
+		_, ok := r.d[v]
+		if !ok {
+			return false
+		}
+	}
+	return true
 }
 
 func (r *roleSet) String() string {

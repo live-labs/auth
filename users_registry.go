@@ -192,7 +192,7 @@ func (u *UsersRegistry) SetRoles(username string, roles ...string) error {
 		return UnauthorizedError
 	}
 
-	if user.Roles.Has(RoleAdmin) {
+	if user.Roles.HasAny(RoleAdmin) {
 		return errors.New("admin role can't be removed")
 	}
 

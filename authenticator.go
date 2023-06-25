@@ -35,7 +35,7 @@ func NewAuthenticator(secret string) *Authenticator {
 }
 
 // Wrap wraps the next handler and checks if the user is authenticated and has the required roles
-func (a *Authenticator) Wrap(next http.HandlerFunc, requiredRoles ...string) http.HandlerFunc {
+func (a *Authenticator) Wrap(next http.HandlerFunc, requireAllRoles bool, requiredRoles ...string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 
 		hdr := request.Header.Get("Authorization")
@@ -101,13 +101,19 @@ func (a *Authenticator) Wrap(next http.HandlerFunc, requiredRoles ...string) htt
 		roleList.LoadFrom(rolesStr)
 
 		// Check if the user has admin role -> if yes, allow access to all endpoints
-		if roleList.Has(RoleAdmin) {
+		if roleList.HasAny(RoleAdmin) {
+			next(writer, request)
+			return
+		}
+
+		// Check if the user has all of the required roles
+		if requireAllRoles && roleList.HasAll(requiredRoles...) {
 			next(writer, request)
 			return
 		}
 
 		// Check if the user has any of the required roles
-		if roleList.HasAny(requiredRoles) {
+		if !requireAllRoles && roleList.HasAny(requiredRoles...) {
 			next(writer, request)
 			return
 		}
