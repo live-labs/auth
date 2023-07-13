@@ -1,6 +1,6 @@
 package auth
 
-// Storage is an interface for user storage. It is used by UsersRegistry.
+// Storage is an interface for user storage. It is used by Registry.
 // It should be implemented by the user of the library.
 type Storage interface {
 	// Save saves a new user or updates an existing one.

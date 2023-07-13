@@ -5,9 +5,12 @@ import (
 	"testing"
 )
 
+const STORAGE_FILE = ".local/storage.dat"
+const SALT = "salt"
+
 func TestNewSimpleFileStorage(t *testing.T) {
-	os.Remove("storage.dat")
-	storage, err := NewSimpleFileStorage("storage.dat", "salt")
+	os.Remove(STORAGE_FILE)
+	storage, err := NewSimpleFileStorage(STORAGE_FILE, SALT)
 	if err != nil {
 		t.Errorf("error initializing storage: %v", err)
 	}
@@ -17,8 +20,8 @@ func TestNewSimpleFileStorage(t *testing.T) {
 }
 
 func TestSimpleFileStorage_Save_Load_Auth(t *testing.T) {
-	os.Remove("storage.dat")
-	storage, err := NewSimpleFileStorage("storage.dat", "salt")
+	os.Remove(STORAGE_FILE)
+	storage, err := NewSimpleFileStorage(STORAGE_FILE, SALT)
 	if err != nil {
 		t.Errorf("error initializing storage: %v", err)
 	}
@@ -62,7 +65,7 @@ func TestSimpleFileStorage_Save_Load_Auth(t *testing.T) {
 		t.Errorf("password validation should succeed")
 	}
 
-	storage2, err := NewSimpleFileStorage("storage.dat", "salt")
+	storage2, err := NewSimpleFileStorage(STORAGE_FILE, SALT)
 	if err != nil {
 		t.Errorf("error initializing storage: %v", err)
 	}
@@ -113,8 +116,8 @@ func TestSimpleFileStorage_Save_Load_Auth(t *testing.T) {
 }
 
 func TestSimpleFileStorage_Delete(t *testing.T) {
-	os.Remove("storage.dat")
-	storage, err := NewSimpleFileStorage("storage.dat", "salt")
+	os.Remove(STORAGE_FILE)
+	storage, err := NewSimpleFileStorage(STORAGE_FILE, SALT)
 	if err != nil {
 		t.Errorf("error initializing storage: %v", err)
 	}
@@ -143,7 +146,7 @@ func TestSimpleFileStorage_Delete(t *testing.T) {
 		t.Errorf("error deleting user: %v", err)
 	}
 
-	storage2, err := NewSimpleFileStorage("storage.dat", "salt")
+	storage2, err := NewSimpleFileStorage(STORAGE_FILE, SALT)
 	if err != nil {
 		t.Errorf("error initializing storage: %v", err)
 	}

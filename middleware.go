@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// Authenticator is a middleware that checks if the user is authenticated and has the required roles
+// Middleware  checks if the user is authenticated and has the required roles
 // If the user is not authenticated or does not have the required roles, the middleware returns 401
 // If the user is authenticated and has the required roles, the middleware calls the next handler
 // The middleware expects the Authorization header to contain a valid JWT token, e.g.:
@@ -22,20 +22,20 @@ import (
 // roles is a comma separated list of roles
 // if "admin" is present in the roles list, the user is allowed to access all endpoints,
 // otherwise the user must have at least one of the required roles.
-type Authenticator struct {
+type Middleware struct {
 	secret string
 }
 
-// NewAuthenticator creates a new Authenticator
+// NewMiddleware creates a new Middleware
 // secret is the secret used to sign the JWT token
-func NewAuthenticator(secret string) *Authenticator {
-	return &Authenticator{
+func NewMiddleware(secret string) *Middleware {
+	return &Middleware{
 		secret: secret,
 	}
 }
 
 // Wrap wraps the next handler and checks if the user is authenticated and has the required roles
-func (a *Authenticator) Wrap(next http.HandlerFunc, requireAllRoles bool, requiredRoles ...string) http.HandlerFunc {
+func (a *Middleware) Wrap(next http.Handler, requireAllRoles bool, requiredRoles ...string) http.HandlerFunc {
 	return func(writer http.ResponseWriter, request *http.Request) {
 
 		hdr := request.Header.Get("Authorization")
@@ -102,19 +102,19 @@ func (a *Authenticator) Wrap(next http.HandlerFunc, requireAllRoles bool, requir
 
 		// Check if the user has admin role -> if yes, allow access to all endpoints
 		if roleList.HasAny(RoleAdmin) {
-			next(writer, request)
+			next.ServeHTTP(writer, request)
 			return
 		}
 
 		// Check if the user has all of the required roles
 		if requireAllRoles && roleList.HasAll(requiredRoles...) {
-			next(writer, request)
+			next.ServeHTTP(writer, request)
 			return
 		}
 
 		// Check if the user has any of the required roles
 		if !requireAllRoles && roleList.HasAny(requiredRoles...) {
-			next(writer, request)
+			next.ServeHTTP(writer, request)
 			return
 		}
 

@@ -262,11 +262,11 @@ func TestAuthRequired_NoAuth(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	authenticator := NewAuthenticator(secret)
+	authenticator := NewMiddleware(secret)
 
-	httpHandlerFunc := authenticator.Wrap(func(writer http.ResponseWriter, request *http.Request) {
+	httpHandlerFunc := authenticator.Wrap(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusOK)
-	}, true)
+	}), true)
 
 	httpHandlerFunc.ServeHTTP(rr, req)
 
@@ -301,11 +301,11 @@ func TestAuthRequired_AuthCorrect(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	authenticator := NewAuthenticator(secret)
+	authenticator := NewMiddleware(secret)
 
-	httpHandlerFunc := authenticator.Wrap(func(writer http.ResponseWriter, request *http.Request) {
+	httpHandlerFunc := authenticator.Wrap(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		writer.WriteHeader(http.StatusOK)
-	}, true)
+	}), true)
 
 	httpHandlerFunc.ServeHTTP(rr, req)
 

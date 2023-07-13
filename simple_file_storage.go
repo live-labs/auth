@@ -12,12 +12,12 @@ import (
 )
 
 // SimpleFileStorage is a simple file-based storage implementation
-// for the UsersRegistry. It stores users in a hystorical file order.
-// It is not intended for production usr, but it is useful for testing.
+// for the Registry. It stores users in a historical order.
 // The file format is:
-// +unix_timestamp_ms:username:password_hash:role1,role2,role3:0|1:{json encoded user data}
-// -unix_timestamp_ms:username
+// +unix_timestamp_nano:username:password_hash:role1,role2,role3:0|1:{json encoded user data}
+// -unix_timestamp_nano:username
 // file is append-only, so if a user is deleted, the line is added with -username
+// There should be only one instance of SimpleFileStorage for a file.
 type SimpleFileStorage struct {
 	path      string
 	salt      string
@@ -41,6 +41,7 @@ func NewSimpleFileStorage(path, salt string) (*SimpleFileStorage, error) {
 		path:           path,
 		state:          make(map[string]*User),
 		passwordHashes: make(map[string]string),
+		salt:           salt,
 	}
 
 	err := sfs.loadState()
@@ -111,7 +112,7 @@ func (s *SimpleFileStorage) Save(u *User) error {
 	}
 	defer f.Close()
 
-	ts := time.Now().UnixMilli()
+	ts := time.Now().UnixNano()
 
 	bl := 0
 	if u.Blacklisted {
@@ -155,7 +156,7 @@ func (s *SimpleFileStorage) Delete(username string) error {
 	}
 	defer f.Close()
 
-	ts := time.Now().UnixMilli()
+	ts := time.Now().UnixNano()
 
 	// write user to file
 	_, err = f.WriteString(fmt.Sprintf("-%d:%s\n", ts, username))
@@ -184,7 +185,7 @@ func (s *SimpleFileStorage) SetPassword(username string, password string) error 
 		return fmt.Errorf("user not found")
 	}
 
-	ts := time.Now().UnixMilli()
+	ts := time.Now().UnixNano()
 	bl := 0
 	if user.Blacklisted {
 		bl = 1

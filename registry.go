@@ -9,21 +9,21 @@ import (
 
 var UnauthorizedError = errors.New("unauthorized")
 
-type UsersRegistry struct {
+type Registry struct {
 	storage       Storage
 	refreshTokens map[string]string // refresh token -> username
 	secret        string
 }
 
-func NewRegistry(storage Storage, secret string) *UsersRegistry {
-	return &UsersRegistry{
+func NewRegistry(storage Storage, secret string) *Registry {
+	return &Registry{
 		storage:       storage,
 		refreshTokens: make(map[string]string),
 		secret:        secret,
 	}
 }
 
-func (u *UsersRegistry) Register(username string, password string) error {
+func (u *Registry) Register(username string, password string) error {
 	user, err := u.storage.Load(username)
 
 	if err != nil {
@@ -52,7 +52,7 @@ func (u *UsersRegistry) Register(username string, password string) error {
 	return nil
 }
 
-func (u *UsersRegistry) Login(username string, password string) (token string, refreshToken string, err error) {
+func (u *Registry) Login(username string, password string) (token string, refreshToken string, err error) {
 	user, err := u.storage.Load(username)
 
 	if err != nil {
@@ -93,7 +93,7 @@ func (u *UsersRegistry) Login(username string, password string) (token string, r
 	return token, refreshToken, nil
 }
 
-func (u *UsersRegistry) Refresh(username, refreshToken string) (token string, err error) {
+func (u *Registry) Refresh(username, refreshToken string) (token string, err error) {
 
 	_, ok := u.refreshTokens[refreshToken]
 	if !ok {
@@ -131,7 +131,7 @@ func (u *UsersRegistry) Refresh(username, refreshToken string) (token string, er
 
 }
 
-func (u *UsersRegistry) Logout(username, refreshToken string) error {
+func (u *Registry) Logout(username, refreshToken string) error {
 	user, err := u.storage.Load(username)
 
 	if err != nil {
@@ -150,7 +150,7 @@ func (u *UsersRegistry) Logout(username, refreshToken string) error {
 	return nil
 }
 
-func (u *UsersRegistry) Blacklist(username string) error {
+func (u *Registry) Blacklist(username string) error {
 	user, err := u.storage.Load(username)
 	if err != nil {
 		return fmt.Errorf("error loading user: %w", err)
@@ -165,7 +165,7 @@ func (u *UsersRegistry) Blacklist(username string) error {
 	return u.storage.Save(user)
 }
 
-func (u *UsersRegistry) Unblacklist(username string) error {
+func (u *Registry) Unblacklist(username string) error {
 	user, err := u.storage.Load(username)
 
 	if err != nil {
@@ -181,7 +181,7 @@ func (u *UsersRegistry) Unblacklist(username string) error {
 	return u.storage.Save(user)
 }
 
-func (u *UsersRegistry) SetRoles(username string, roles ...string) error {
+func (u *Registry) SetRoles(username string, roles ...string) error {
 	user, err := u.storage.Load(username)
 
 	if err != nil {
